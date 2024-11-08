@@ -29,3 +29,41 @@ Depois sirva o frontend:
  ```bash
  ng serve
  ```
+
+## Entendendo o providedIn
+Crie um TypeScript com os tipos que serão usados a partir da API.
+```TypeScript
+export interface Promocao {
+  id: number
+  destino: string
+  imagem: string
+  preco: number
+}
+```
+
+Em seguida, crie o serviço `core/services/promocao`:
+```bash
+cd frontend
+ng g s core/services/promocao
+# Output:
+CREATE src/app/core/services/promocao.service.spec.ts (367 bytes)
+CREATE src/app/core/services/promocao.service.ts (137 bytes)
+```
+
+Vamos estudar o Type Script do serviço gerado
+```TypeScript
+// frontend\src\app\core\services\promocao.service.ts
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root' // Indica onde o serviço será provido.
+})
+export class PromocaoService {
+
+  constructor() { }
+}
+```
+
+O parâmetro `providedIn` dentro da declaração `@Injectable` indica onde que o serviço será provido. No caso, ele será provido no componente `root` da aplicação.
+
+O uso do `provideIn` no componente `app-root` é um meio de implementar o design pattern Singleton.
