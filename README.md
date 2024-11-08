@@ -203,3 +203,66 @@ export class HomeComponent implements OnInit {
   }
 }
 ```
+## Desafio: ajustes de layout e novos serviços
+Mudanças em `HomeComponent`:
+
+```HTML
+<!-- frontend\src\app\pages\home\home.component.html -->
+<!-- Resto do código -->
+    <app-card-busca *ngFor="let item of promocoes" [promocao]="item"></app-card-busca>
+<!-- Resto do código -->
+```
+``` TypeScript
+// frontend\src\app\pages\home\home.component.ts
+// Resto do código
+import { Promocao } from 'src/app/core/types/type';
+
+@Component({
+  // Resto do código
+})
+export class HomeComponent implements OnInit {
+  promocoes!: Promocao[] // Variável visualizada no HTML.
+  // Note a exclamação depois da declaração: isso permite variáveis não inicializadas.
+  // Resto do código
+  ngOnInit(): void {
+      this.servicoPromocao.listar()
+        .subscribe(
+          resposta => {
+            this.promocoes = resposta
+          }
+        )
+  }
+}
+```
+
+Mudanças em `CardBuscaComponent`:
+```HTML
+<!-- frontend\src\app\shared\card-busca\card-busca.component.html -->
+<mat-card class="card-busca">
+  <img mat-card-image
+    src="{{ promocao.imagem }}" alt="Imagem do destino">
+  <mat-card-content>
+    <ul>
+      <li>{{ promocao.destino }}</li>
+      <li>R$ {{ promocao.preco }}</li>
+    </ul>
+  </mat-card-content>
+  <!-- Resto do código -->
+</mat-card>
+```
+> Basicamente é mudança na interpolação.
+
+```TypeScript
+import { Component, Input } from '@angular/core';
+import { Promocao } from 'src/app/core/types/type';
+
+@Component({
+  selector: 'app-card-busca',
+  templateUrl: './card-busca.component.html',
+  styleUrls: ['./card-busca.component.scss']
+})
+export class CardBuscaComponent {
+  @Input() promocao!: Promocao
+}
+```
+> Note que a variável de Input `promocao` só é preenchida por um componente externo, no caso a partir de `HomeComponent`.
