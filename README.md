@@ -180,3 +180,26 @@ export class AppModule { }
 ```
 
 Mesmo após corrigir o import do módulo `HttpClientModule`, o construtor de `HomeComponent` não executa o método `listar`. Isso será avaliado na próxima aula.
+
+## De olho no observable
+Os objetos `Observable` possuem o método `subscribe`. Esse método liga o `Observable` ao observador que o requisitou e implementa o callback que será chamado quando o `Observable` mudar. No exemplo abaixo, o componente `HomeComponent` referencia o serviço `PromocaoService`. Este último será o observador que vai se subscrever aos `Observable<Promocao[]>` retornados, e vai reagir com o callback do `console.log`:
+
+```TypeScript
+import { Component, OnInit } from '@angular/core';
+import { PromocaoService } from 'src/app/core/services/promocao.service';
+
+@Component({
+  // Resto do código
+})
+export class HomeComponent implements OnInit {
+  constructor( private servicoPromocao: PromocaoService) {}
+  ngOnInit(): void { // Comportamento ao iniciar o componente.
+      this.servicoPromocao.listar() // O serviço chamada o método, mas não se inscreveu ainda.
+        .subscribe( // Os Observable retornados permitem a subscrição pelo serviço `servicoPromocao`.
+          resposta => { // Declaração do callback.
+            console.log(resposta) // Execução do callback quando o Observable mudar.
+          }
+        )
+  }
+}
+```
