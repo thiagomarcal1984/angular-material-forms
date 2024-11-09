@@ -267,6 +267,7 @@ export class CardBuscaComponent {
 ```
 > Note que a variável de Input `promocao` só é preenchida por um componente externo, no caso a partir de `HomeComponent`.
 
+# Formulário controlado
 ## Analisando o form de busca
 Vamos criar o serviço do form-busca:
 
@@ -279,6 +280,7 @@ CREATE src/app/core/services/form-busca.service.ts (138 bytes)
 O serviço vai simplesmente instanciar um objeto `FormGroup` do Angular. A ideia é permitir reúso do formulário desse serviço em diferentes componentes.
 
 ```TypeScript
+// frontend\src\app\core\services\form-busca.service.ts
 import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
@@ -290,5 +292,45 @@ export class FormBuscaService {
   constructor() {
     this.formBusca = new FormGroup({})
   }
+}
+```
+## Um serviço para a todos governar
+Inclusão do controle de formulário `somenteIda` no serviço `FormBuscaService`:
+```TypeScript
+// frontend\src\app\core\services\form-busca.service.ts
+import { Injectable } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class FormBuscaService {
+  formBusca: FormGroup
+  constructor() {
+    this.formBusca = new FormGroup({
+      // O parâmetro booleano em FormControl é pra saber
+      // se o o fluxo (databinding) é de somente ida.
+      somenteIda: new FormControl(false)
+    })
+  }
+}
+```
+
+Inclusão do serviço `FormBuscaService` no componente `FormBuscaComponent`:
+```TypeScript
+// frontend\src\app\shared\form-busca\form-busca.component.ts
+// Resto do código
+import { FormBuscaService } from 'src/app/core/services/form-busca.service';
+
+@Component({
+  // Resto do código
+})
+export class FormBuscaComponent {
+  constructor(
+    public dialog: MatDialog,
+    private formBuscaService:FormBuscaService
+  ) {}
+
+  // Resto do código
 }
 ```

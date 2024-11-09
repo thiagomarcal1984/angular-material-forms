@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -7,6 +7,10 @@ import { FormGroup } from '@angular/forms';
 export class FormBuscaService {
   formBusca: FormGroup
   constructor() {
-    this.formBusca = new FormGroup({})
+    this.formBusca = new FormGroup({
+      // O parâmetro booleano em FormControl é pra saber
+      // se o o fluxo (databinding) é de somente ida.
+      somenteIda: new FormControl(false)
+    })
   }
 }
