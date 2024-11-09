@@ -266,3 +266,29 @@ export class CardBuscaComponent {
 }
 ```
 > Note que a variável de Input `promocao` só é preenchida por um componente externo, no caso a partir de `HomeComponent`.
+
+## Analisando o form de busca
+Vamos criar o serviço do form-busca:
+
+```bash
+PS D:\alura\angular-material-forms\frontend> ng g s core/services/form-busca
+CREATE src/app/core/services/form-busca.service.spec.ts (373 bytes)
+CREATE src/app/core/services/form-busca.service.ts (138 bytes)
+```
+
+O serviço vai simplesmente instanciar um objeto `FormGroup` do Angular. A ideia é permitir reúso do formulário desse serviço em diferentes componentes.
+
+```TypeScript
+import { Injectable } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class FormBuscaService {
+  formBusca: FormGroup
+  constructor() {
+    this.formBusca = new FormGroup({})
+  }
+}
+```
