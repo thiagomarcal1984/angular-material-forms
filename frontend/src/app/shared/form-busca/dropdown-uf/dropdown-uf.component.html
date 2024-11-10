@@ -3,11 +3,17 @@
   <mat-icon matPrefix>
     {{ iconePrefixo }}
   </mat-icon>
-  <input matInput [matAutocomplete]="meuId">
+  <input
+    matInput
+    [formControl]="control"
+    [name]="label"
+    ngDefaultControl
+    [matAutocomplete]="meuId"
+  >
   <mat-icon matSuffix>search</mat-icon>
   <mat-autocomplete #meuId="matAutocomplete">
-    <mat-option *ngFor="let option of filteredOptions" [value]="option">
-      {{option}}
+    <mat-option *ngFor="let estado of opcoesFiltradas$ | async" [value]="estado.nome">
+      {{ estado.nome }}
     </mat-option>
   </mat-autocomplete>
 </mat-form-field>

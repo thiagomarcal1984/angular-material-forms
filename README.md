@@ -642,3 +642,131 @@ Perceba a lista `filteredOptions` declarada dentro de `<mat-option>`. Ela é obt
   </mat-option>
 </mat-autocomplete>
 ```
+## Controles do form
+Veja os comentários do Type Script do componente `DropdownUfComponent`:
+
+```TypeScript
+// frontend\src\app\shared\form-busca\dropdown-uf\dropdown-uf.component.ts
+import { UnidadeFederativa } from 'src/app/core/types/type';
+import { UnidadeFederativaService } from './../../../core/services/unidade-federativa.service';
+import { Component, Input, OnInit } from '@angular/core';
+import { map, Observable, startWith } from 'rxjs';
+import { FormControl } from '@angular/forms';
+
+@Component({
+  // Resto do código
+})
+
+// Acréscimo da implementação da interface OnInit.
+export class DropdownUfComponent implements OnInit {
+  @Input() label: string = ''
+  @Input() iconePrefixo: string = ''
+  @Input() control!: FormControl
+
+  // Propriedade que vai receber as unidades
+  // federativas após a inicialização com ngOnInit.
+  unidadesFederativas: UnidadeFederativa[] = []
+
+  // Observables com as unidades federativas filtradas.
+  opcoesFiltradas$?: Observable<UnidadeFederativa[]>
+
+  constructor (
+    // Injeção do serviço UnidadeFederativaService
+    private unidadeFederativaService: UnidadeFederativaService,
+  ) {}
+
+  ngOnInit(): void { // Método obrigatório da interface OnInit.
+    this.unidadeFederativaService.listar()
+      .subscribe(dados => {
+        // Atribuição da unidades federativas.
+        this.unidadesFederativas = dados
+        // Impressão das unidades federativas para teste.
+        console.log(this.unidadesFederativas)
+      })
+
+      // Para qualquer mudança de valor no controle, retorna
+      // um mapeamento oriundo da função filtrarUfs.
+      this.opcoesFiltradas$ = this.control.valueChanges.pipe(
+        startWith(''),
+        map(value => this.filtrarUfs(value || '')),
+      );
+    }
+
+  private filtrarUfs(value: string): UnidadeFederativa[] {
+    const valorFiltrado = value.toLowerCase();
+
+    return this.unidadesFederativas.filter(estado => estado.nome.toLowerCase().includes(valorFiltrado));
+  }
+}
+```
+
+Mudança em `FormBuscaService` para implementar a procura pelos componentes do seu `FormGroup` interno (o objeto `formBusca`):
+```TypeScript
+// frontend\src\app\core\services\form-busca.service.ts
+import { Injectable } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class FormBuscaService {
+  formBusca: FormGroup
+  constructor() {
+    this.formBusca = new FormGroup({
+      // O parâmetro FormControl é o valor padrão do componente.
+      somenteIda: new FormControl(false),
+      origem: new FormControl(null),
+      destino: new FormControl(null),
+    })
+  }
+
+  obterControle(nome: string) : FormControl {
+    const control = this.formBusca.get(nome)
+    if (!control) {
+      throw new Error(`Form control com nome "${nome}" não existe.`)
+    }
+    return control as FormControl
+  }
+}
+```
+
+Estruturação do HTML do componente `DropdownUfComponent`:
+```HTML
+<!-- frontend\src\app\shared\form-busca\dropdown-uf\dropdown-uf.component.html -->
+<mat-form-field class="input-container" appearance="outline">
+  <mat-label>{{ label }}</mat-label>
+  <mat-icon matPrefix>
+    {{ iconePrefixo }}
+  </mat-icon>
+  <input
+    matInput
+    [formControl]="control"
+    [name]="label"
+    ngDefaultControl
+    [matAutocomplete]="meuId"
+  >
+  <mat-icon matSuffix>search</mat-icon>
+  <mat-autocomplete #meuId="matAutocomplete">
+    <mat-option *ngFor="let estado of opcoesFiltradas$ | async" [value]="estado.nome">
+      {{ estado.nome }}
+    </mat-option>
+  </mat-autocomplete>
+</mat-form-field>
+```
+> Note os elementos entre chaves no HTML: eles recebem objetos complexos ao invés de simples strings; o que está à direita é o objeto procurado do componente atual (no caso, o `DropdownUfComponent`).
+> 1. `[formControl]` recebe o objeto de nome `control` localizado no TypeScript do `DropdownUfComponent`.
+> 2. `[name]` recebe o objeto de nome `label` localizado no TypeScript do `DropdownUfComponent`.
+> 3. `[matAutocomplete]` recebe um objeto complexo do tipo `MatAutocompleteComponent`. O `MatautocompleteComponent` é criado dentro do HTML do `DropdownUfComponent`. O `MatAutocompleteComponent` recebe uma ID (no exemplo, #meuId), e é referenciado na propriedade `[matAutocomplete]` do componente `DropdownUfComponent`.
+
+Agora, a estrutura do HTML do componente pai `FormBuscaComponent`:
+```HTML
+<!-- frontend\src\app\shared\form-busca\form-busca.component.html -->
+
+<!-- Resto do código -->
+<app-dropdown-uf label="Origem" iconePrefixo="flight_takeoff" [control]="formBuscaService.obterControle('origem')"/>
+<!-- Resto do código -->
+<app-dropdown-uf label="Destino" iconePrefixo="flight_land" [control]="formBuscaService.obterControle('destino')"/>
+<!-- Resto do código -->
+```
+
+> Note que a propriedade `[control]` recebe um objeto complexo (não a string contida entre as aspas) retornado da função `obterControle` do objeto `formBuscaService` do compoonente.
