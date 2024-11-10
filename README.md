@@ -569,3 +569,76 @@ Vamos testar o uso do dropdown no HTML do `FormBuscaComponent`:
   </form>
 </app-card>
 ```
+
+## Recebendo os inputs
+Vamos importar o módulo do componente `MatAutocomplete` em `app.module.ts`:
+```TypeScript
+// frontend\src\app\app.module.ts
+import { NgModule } from '@angular/core';
+// resto do código
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+@NgModule({
+  // Resto do código
+  imports: [
+    MatAutocompleteModule,
+  ],
+  // Resto do código
+})
+export class AppModule { }
+```
+
+Agora vamos definir os parâmetros de entrada do componente `DropdownUfComponent`:
+```TypeScript
+// frontend\src\app\shared\form-busca\dropdown-uf\dropdown-uf.component.ts
+import { Component, Input } from '@angular/core';
+
+@Component({
+  // Resto do código
+})
+export class DropdownUfComponent {
+  @Input() label: String = ''
+  @Input() iconePrefixo: String = ''
+
+  filteredOptions = []
+}
+```
+> Os parâmetros de entrada podem ser inicializados ou __podem ser declarados sem inicialização__, desde que sejam sufixados com um ponto de exclamação:
+> ```TypeScript
+> export class MeuComponent {
+>   @Input() label!: String
+> }
+> ```
+
+Agora vamos ao HTML do componente:
+```HTML
+<!-- frontend\src\app\shared\form-busca\dropdown-uf\dropdown-uf.component.html -->
+<mat-form-field class="input-container" appearance="outline">
+  <mat-label>{{ label }}</mat-label>
+  <mat-icon matPrefix>
+    {{ iconePrefixo }}
+  </mat-icon>
+  <input matInput [matAutocomplete]="meuId">
+  <mat-icon matSuffix>search</mat-icon>
+  <mat-autocomplete #meuId="matAutocomplete">
+    <mat-option *ngFor="let option of filteredOptions" [value]="option">
+      {{option}}
+    </mat-option>
+  </mat-autocomplete>
+</mat-form-field>
+```
+> Note que o atributo placeholder foi removido tanto do HTML quanto do TypeScript.
+
+Outro ponto interessante é que o componente `MatAutocomplete` ele é isolado do campo de entrada. Para ligar o campo de entrada ao componente de autocomplete, é necessário:
+1. dentro de `<mat-autocomplete>`, atribuir o valor `matAutocomplete` a uma ID de nome aleatório prefixada com cerquilha (`<mat-autocomplete #meuId="matAutocomplete">`); e
+2. dentro do campo de entrada `<input>`, atribuir a ID à propriedade `[matAutocomplete]`, com as chaves e sem a cerquilha (`<input matInput [matAutocomplete]="meuId">`)
+
+> Houve mudanças nos SCSS, mas que não tem muito relevância para o curso.
+
+Perceba a lista `filteredOptions` declarada dentro de `<mat-option>`. Ela é obtida a partir do Type Script do `DropdownUfComponent`. Por enquanto a lista está vazia e não está tipada. Note também que o valor de cada opção por enquanto corresponde ao elemento (como um todo) da lista. Destaque focado no HTML do componente:
+```HTML
+<mat-autocomplete #meuId="matAutocomplete">
+  <mat-option *ngFor="let option of filteredOptions" [value]="option">
+    {{option}}
+  </mat-option>
+</mat-autocomplete>
+```

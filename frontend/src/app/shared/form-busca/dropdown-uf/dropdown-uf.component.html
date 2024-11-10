@@ -1,11 +1,13 @@
 <mat-form-field class="input-container" appearance="outline">
-  <!-- <mat-label>{{ label }}</mat-label> -->
-  <mat-label>Label</mat-label>
+  <mat-label>{{ label }}</mat-label>
   <mat-icon matPrefix>
-    <!-- {{ matPrefix }} -->
-    question_mark
+    {{ iconePrefixo }}
   </mat-icon>
-  <!-- <input matInput [placeholder]="placeholder"> -->
-  <input matInput placeholder="Placeholder">
+  <input matInput [matAutocomplete]="meuId">
   <mat-icon matSuffix>search</mat-icon>
+  <mat-autocomplete #meuId="matAutocomplete">
+    <mat-option *ngFor="let option of filteredOptions" [value]="option">
+      {{option}}
+    </mat-option>
+  </mat-autocomplete>
 </mat-form-field>

@@ -28,6 +28,7 @@ import {MatDialogModule} from '@angular/material/dialog';
 import { BotaoControleComponent } from './shared/botao-controle/botao-controle.component';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { DropdownUfComponent } from './shared/form-busca/dropdown-uf/dropdown-uf.component';
 
 @NgModule({
@@ -63,6 +64,7 @@ import { DropdownUfComponent } from './shared/form-busca/dropdown-uf/dropdown-uf
     MatDialogModule,
     HttpClientModule,
     ReactiveFormsModule,
+    MatAutocompleteModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
