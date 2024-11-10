@@ -440,3 +440,69 @@ Agora vamos modificar o MatButtonToggle no componente `FormBuscaComponent`:
 > 2. O controle do estado agora vai acontecer em função do `value` selecionado para o `<mat-button-toggle-group>`.
 > 3. Repare na interrogação depois do método `.get` em cada `<mat-button-toggle>`. Ele é chamado de `nullable operator` e serve para criar um "curto circuito", em que se força o retorno `null` caso a função não tenha retorno, e assim não há a tentativa de acesso ao atributo `value`.
 > 4. A função `if` dentro de cada `<mat-icon>` testa se o ícone será ou não exibido, a depender do valor selecionado do `<mat-button-toggle-group>`.
+
+## Desafio: Serviço de Unidades Federativas
+Gerando o serviço `UnidadeFederativaService`:
+```bash
+ng g s core/services/UnidadeFederativa  
+# Output
+CREATE src/app/core/services/unidade-federativa.service.spec.ts (413 bytes)
+CREATE src/app/core/services/unidade-federativa.service.ts (146 bytes)
+```
+> Note que não escrevemos o sufixo `Service` para gerar o serviço. Isso é feito automaticamente pelo Angular CLI.
+
+Depois, vamos criar a interface `UnidadeFederativa` no arquivo `types.ts`:
+```TypeScript
+// frontend\src\app\core\types\type.ts
+
+// export interface Promocao { Resto do código }
+
+export interface UnidadeFederativa {
+  id: number
+  nome: string
+  sigla: string
+}
+```
+
+Finalmente, vamos implementar o serviço de `UnidadeFederativaService`:
+```TypeScript
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable, shareReplay } from 'rxjs';
+import { UnidadeFederativa } from '../types/type';
+import { environment } from 'src/environments/environment';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UnidadeFederativaService {
+  private apiUrl: string = environment.apiUrl
+  // Toda variável sufixada com $ (dolar sign) representa
+  // um Observable ou uma stream.
+  private cache$?: Observable<UnidadeFederativa[]>
+
+  constructor(
+    private http: HttpClient
+  ) { }
+
+  listar(): Observable<UnidadeFederativa[]> {
+    if (!this.cache$) {
+      // Depois de concluir requestEstados(), o
+      // resultado é enviado para o método
+      // shareReplay, que gera o cache e
+      // evita uma nova requisição HTTP.
+      this.cache$ = this.requestEstados().pipe(
+        shareReplay(1)
+      )
+    }
+
+    return this.cache$
+  }
+
+  // Este método só é chamado na primeira
+  // criação do cache$.
+  private requestEstados(): Observable<UnidadeFederativa[]> {
+    return this.http.get<UnidadeFederativa[]>(`${this.apiUrl}/estados`)
+  }
+}
+```
