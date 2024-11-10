@@ -11,7 +11,7 @@ import { FormBuscaService } from 'src/app/core/services/form-busca.service';
 export class FormBuscaComponent {
   constructor(
     public dialog: MatDialog,
-    private formBuscaService:FormBuscaService
+    public formBuscaService: FormBuscaService
   ) {}
 
   openDialog() {

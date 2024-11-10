@@ -334,3 +334,109 @@ export class FormBuscaComponent {
   // Resto do código
 }
 ```
+
+## TypeScript a nosso favor
+Primeira mudança no HTML do componente `FormBuscaComponent`:
+```HTML
+<!-- frontend\src\app\shared\form-busca\form-busca.component.html -->
+<app-card variant="secondary" class="form-busca">
+  <form [formGroup]="formBuscaService.formBusca">
+  <!-- Resto do código -->
+   </form>
+</app-card>
+```
+A mudança de agora foi associar o FormGroup `formBusca` do serviço ao formulário do componente. Mas o seguinte erro aparece: 
+```
+src/app/shared/form-busca/form-busca.component.html:2:10 - error NG8002: Can't bind to 'formGroup' since it isn't a known property of 'form'.
+
+2    <form [formGroup]="formBuscaService.formBusca">
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/app/shared/form-busca/form-busca.component.ts:8:16
+    8   templateUrl: './form-busca.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component FormBuscaComponent.
+```
+
+Isso acontece porque o módulo do FormGroup não foi importado em `app.module.ts`:
+```TypeScript
+// frontend\src\app\app.module.ts
+import { NgModule } from '@angular/core';
+// Resto do código
+import { ReactiveFormsModule } from '@angular/forms';
+
+@NgModule({
+  declarations: [ // para componentes externos.
+    // Resto do código
+  ],
+  imports: [ // para módulos externos.
+    // Resto do código
+    ReactiveFormsModule,
+  ],
+  // Resto do código
+})
+export class AppModule { }
+```
+> Note que o que foi importado foi o `ReactiveFormsModule`, não o `FormsModule`.
+
+Mesmo após importar o `ReactiveFormsModule`, outro erro aparece: 
+```
+src/app/shared/form-busca/form-busca.component.html:2:23 - error TS2341: Property 'formBuscaService' is private and only accessible within class 'FormBuscaComponent'.
+
+2    <form [formGroup]="formBuscaService.formBusca">
+                        ~~~~~~~~~~~~~~~~
+
+  src/app/shared/form-busca/form-busca.component.ts:8:16
+    8   templateUrl: './form-busca.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component FormBuscaComponent.
+```
+
+Autoexplicativo: o serviço está privado no componente. Vamos torná-lo público: 
+```TypeScript
+// frontend\src\app\core\services\form-busca.service.ts
+import { Component } from '@angular/core';
+// Resto do código
+import { FormBuscaService } from 'src/app/core/services/form-busca.service';
+
+@Component({
+  // Resto do código
+})
+export class FormBuscaComponent {
+  constructor(
+    // Resto do código
+    public formBuscaService: FormBuscaService
+  ) {}
+  // Resto do código
+}
+```
+
+Agora vamos modificar o MatButtonToggle no componente `FormBuscaComponent`:
+```HTML
+<!-- frontend\src\app\shared\form-busca\form-busca.component.html -->
+<app-card variant="secondary" class="form-busca">
+   <form [formGroup]="formBuscaService.formBusca">
+    <h2>Passagens</h2>
+    <div class="flex-container">
+      <mat-button-toggle-group aria-label="Tipo de passagem" formControlName="somenteIda">
+        <mat-button-toggle [value]="false">
+          <mat-icon *ngIf="!formBuscaService.formBusca.get('somenteIda')?.value">check</mat-icon>
+          IDA E VOLTA
+        </mat-button-toggle>
+        <mat-button-toggle [value]="true">
+          <mat-icon *ngIf="formBuscaService.formBusca.get('somenteIda')?.value">check</mat-icon>
+          SOMENTE IDA
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+      <!-- Resto do código -->
+    </div>
+    <!-- Resto do código -->
+  </form>
+</app-card>
+```
+
+> Pontos para observar:
+> 1. O elemento `<mat-button-toggle>` tinha o atributo `checked`. Agora ele foi removido.
+> 2. O controle do estado agora vai acontecer em função do `value` selecionado para o `<mat-button-toggle-group>`.
+> 3. Repare na interrogação depois do método `.get` em cada `<mat-button-toggle>`. Ele é chamado de `nullable operator` e serve para criar um "curto circuito", em que se força o retorno `null` caso a função não tenha retorno, e assim não há a tentativa de acesso ao atributo `value`.
+> 4. A função `if` dentro de cada `<mat-icon>` testa se o ícone será ou não exibido, a depender do valor selecionado do `<mat-button-toggle-group>`.
