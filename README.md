@@ -506,3 +506,66 @@ export class UnidadeFederativaService {
   }
 }
 ```
+
+# Dropdown de origem e destino
+## Preparando a base
+Criando o subcomponente `DropdownUfComponent` dentro de `FormBusca`:
+```bash
+ng g c shared/form-busca/dropdown-uf
+```
+
+Criado o componente `DropdownUfComponent`, vamos copiar o HTML dele a partir do HTML do `FormBuscaComponent`:
+```HTML
+<!-- frontend\src\app\shared\form-busca\dropdown-uf\dropdown-uf.component.html -->
+<mat-form-field class="input-container" appearance="outline">
+  <mat-label>Label</mat-label>
+  <mat-icon matPrefix>
+    question_mark
+  </mat-icon>
+  <input matInput placeholder="Placeholder">
+  <mat-icon matSuffix>search</mat-icon>
+</mat-form-field>
+```
+> Depois vamos interpolar os textos `Label`, `question_mark` e `Placeholder` nas próximas aulas.
+
+Vamos testar o uso do dropdown no HTML do `FormBuscaComponent`:
+```HTML
+<app-card variant="secondary" class="form-busca">
+   <form [formGroup]="formBuscaService.formBusca">
+    <h2>Passagens</h2>
+    <!-- Resto do código -->
+    <div class="flex-container">
+      <!--
+        O comentário abaixo vai servir de referência para 
+        preenchimento do componente dropdown 
+      -->       
+      <!-- <mat-form-field class="input-container" appearance="outline">
+        <mat-label>Origem</mat-label>
+        <mat-icon matPrefix>
+          flight_takeoff
+        </mat-icon>
+        <input matInput placeholder="Origem">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field> -->
+      <app-dropdown-uf/>
+      <button mat-icon-button>
+        <mat-icon>sync_alt</mat-icon>
+      </button>
+      <app-dropdown-uf/>
+      <!--
+        O comentário abaixo vai servir de referência para 
+        preenchimento do componente dropdown 
+      -->
+      <!-- <mat-form-field class="input-container" appearance="outline">
+        <mat-label>Destino</mat-label>
+        <mat-icon matPrefix>
+          flight_land
+        </mat-icon>
+        <input matInput placeholder="Destino">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field> -->
+      <!-- Resto do código -->
+    </div>
+  </form>
+</app-card>
+```
