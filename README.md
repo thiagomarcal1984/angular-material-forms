@@ -1069,3 +1069,9 @@ export class SeletorPassageiroComponent implements ControlValueAccessor {
 ```
 
 Nas próximas aulas haverá mais detalhes dos eventos personalizados `onChange` e `onTouch`.
+
+## Para saber mais: ControlValueAccessor
+- `writeValue(val: any)`: atualiza o valor do componente.
+- `registerOnChange(fn: any)`: registra o evento que vai tratar a mudança de valor do componente e notifica o Angular Forms sobre as mudanças.
+- `registerOnTouched(fn: any)`: evento disparado quando o valor do componente muda.
+- `setDisabledState?(isDisabled: boolean)`: personaliza o estado de desabilitado do componente.
