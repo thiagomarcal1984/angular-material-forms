@@ -967,3 +967,64 @@ export class FormBuscaService {
 > 2. O método `Object.entries(dicionario)` cria um iterável a partir de um dicionário;
 > 3. O método `forEach` do iterável vai receber um array que chamamos de `array_controle` com duas posições (no caso o key/value);
 > 4. O Type Script permite o uso de um operador ternário: `condicao ? 'valor_verdadeiro' : 'valor_falso'`.
+
+# Ajustes finais
+## Componente de passageiros
+Vamos refatorar a seleção de passageiros (ela vai variar em função do tipo de passageiro - adulto, criança ou bebê). Ele está localizado em `ModalComponent`.
+
+```bash
+ng g c shared/seletor-passageiro
+# Output
+CREATE src/app/shared/seletor-passageiro/seletor-passageiro.component.html (33 bytes)
+CREATE src/app/shared/seletor-passageiro/seletor-passageiro.component.spec.ts (637 bytes)
+CREATE src/app/shared/seletor-passageiro/seletor-passageiro.component.ts (250 bytes) 
+CREATE src/app/shared/seletor-passageiro/seletor-passageiro.component.scss (0 bytes) 
+UPDATE src/app/app.module.ts (3070 bytes)
+```
+
+Vamos definir o Type Script do novo componente:
+```TypeScript
+// frontend\src\app\shared\seletor-passageiro\seletor-passageiro.component.ts
+import { Component, Input } from '@angular/core';
+
+@Component({
+  selector: 'app-seletor-passageiro',
+  templateUrl: './seletor-passageiro.component.html',
+  styleUrls: ['./seletor-passageiro.component.scss']
+})
+export class SeletorPassageiroComponent {
+  @Input() titulo: string = 'Titulo'
+  @Input() subtitulo: string = 'Subtitulo'
+}
+```
+Os pontos de entrada serão `titulo` e `subtitulo` serão preenchidos na invocação do componente `SeletorPassageiroComponent`.
+```HTML
+<!-- frontend\src\app\shared\seletor-passageiro\seletor-passageiro.component.html -->
+<ul>
+  <li><strong>{{ titulo }}</strong></li>
+  <li>{{ subtitulo }}</li>
+  <li>
+    <app-botao-controle operacao="decrementar"></app-botao-controle>
+    <span>1</span>
+    <app-botao-controle operacao="incrementar"></app-botao-controle>
+  </li>
+</ul>
+```
+
+Mudanças no HTML do componente `ModalComponent`:
+```HTML
+<!-- frontend\src\app\shared\modal\modal.component.html -->
+<section class="modal">
+  <h1 mat-dialog-title>Viajante</h1>
+  <div mat-dialog-content>
+    <div class="selecao-idade">
+      <app-seletor-passageiro titulo="Adultos" subtitulo="(Acima de 12 anos)"/>
+      <app-seletor-passageiro titulo="Crianças" subtitulo="(Entre 2 e 11 anos)"/>
+      <app-seletor-passageiro titulo="Bebês" subtitulo="(Até 2 anos)"/>
+    </div>
+    <!-- Resto do código -->
+  </div>
+</section>
+```
+
+> Houve mudanças nos SCSS dos dois HTMLs, mas essa mudança não é relevante pro entendimento do Angular.
