@@ -908,3 +908,62 @@ export class ModalComponent {
 ```
 > Repare que a propriedade `[selected]` espera um booleano, não uma string. Por isso está entre chaves.
 > Note também que há um event binding para `(selectionChange)`. Isso permite a mudança de estado do MatChipListbox, conforme método alterarTipo no serviço `FormBuscaService`.
+
+## Descrição de passageiros
+```HTML
+ <!-- frontend\src\app\shared\form-busca\form-busca.component.html -->
+<!-- Resto do código -->
+  <mat-chip-listbox aria-label="Seleção de passagens">
+    <mat-chip (click)="formBuscaService.openDialog()">
+      <div class="inner">
+        <mat-icon>check</mat-icon>
+        {{ formBuscaService.getDescricaoPassageiros() }}
+      </div>
+    </mat-chip>
+    <!-- Resto do código -->
+  </mat-chip-listbox>
+<!-- Resto do código -->
+```
+> Destaque para a interpolação dentro da div de class `inner`: ela vai conter o texto que mostra o número de passageiros e seu tipo (exemplo: 2 adultos, 2 crianças, 1 bebê).
+
+Lógica do serviço `FormBuscaService`:
+```TypeScript
+// frontend\src\app\core\services\form-busca.service.ts
+// Resto do código
+@Injectable({
+  providedIn: 'root'
+})
+export class FormBuscaService {
+  formBusca: FormGroup
+  constructor(
+    private dialog: MatDialog,
+  ) {
+    this.formBusca = new FormGroup({
+      // Resto do código
+      adultos: new FormControl(1),
+      criancas: new FormControl(0),
+      bebes: new FormControl(0),
+    })
+  }
+  // Resto do código
+  getDescricaoPassageiros() {
+    let descricao = ''
+    const controles = {'adultos' : 'adulto', 'criancas' : 'criança', 'bebes' : 'bebê'}
+    Object.entries(controles).forEach(array_controle => {
+      const nome_controle = array_controle[0]
+      const label_controle = array_controle[1]
+
+      const controle = this.formBusca.get(nome_controle)?.value
+      if (controle && controle > 0) {
+        descricao += `${controle} ${label_controle}${controle > 1 ? 's' : ''}, `
+      }
+    })
+    descricao = descricao.substring(0, descricao.length -2)
+    return descricao
+  }
+}
+```
+> 1. O objeto `controles` é um dicionário em que os nomes dos controles são as chaves e o nome em português é o valor;
+> 2. O método `Object.entries(dicionario)` cria um iterável a partir de um dicionário;
+> 3. O método `forEach` do iterável vai receber um array que chamamos de `array_controle` com duas posições (no caso o key/value);
+> 4. O Type Script permite o uso de um operador ternário: `condicao ? 'valor_verdadeiro' : 'valor_falso'`.
