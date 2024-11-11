@@ -1129,3 +1129,80 @@ export class SeletorPassageiroComponent implements ControlValueAccessor {
 }
 ```
 > O event binding `click` vai chamar as operações `incrementar()` e `decrementar()`. Cada uma dessas operações chama os dois métodos que serão modificados pela implementação da interface `ControlValueAccessor`.
+
+## Finalizando o serviço
+Destaque na mudança do HTML do `ModalComponent`:
+```HTML
+<!-- frontend\src\app\shared\modal\modal.component.html -->
+<!-- Resto do código -->
+  <app-seletor-passageiro 
+    [formControl]="formBuscaService.obterControle('adultos')" 
+    titulo="Adultos" 
+    subtitulo="(Acima de 12 anos)"
+  />
+  <app-seletor-passageiro 
+    [formControl]="formBuscaService.obterControle('criancas')" 
+    titulo="Crianças" 
+    subtitulo="(Entre 2 e 11 anos)"
+  />
+  <app-seletor-passageiro 
+    [formControl]="formBuscaService.obterControle('bebes')" 
+    titulo="Bebês" 
+    subtitulo="(Até 2 anos)"
+  />
+<!-- Resto do código -->
+```
+
+A mudança foi no acréscimo da propriedade `[formControl]`. Em teoria, ela deveria ser suficiente para que os spinners funcionassem, mas o seguinte erro aparece: 
+```
+ERROR RuntimeError: NG01203: No value accessor for form control unspecified name attribute. 
+Find more at https://angular.io/errors/NG01203
+```
+
+Esse erro aparece porque faltaram algumas configurações no componente `SeletorPassageiroComponent`, de maneira a expor alguns serviços faltantes por meio do vetor `providers`:
+```TypeScript
+// frontend\src\app\shared\seletor-passageiro\seletor-passageiro.component.ts
+import { Component, forwardRef, Input } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+
+@Component({
+  selector: 'app-seletor-passageiro',
+  templateUrl: './seletor-passageiro.component.html',
+  styleUrls: ['./seletor-passageiro.component.scss'],
+  providers: [ // Relaciona os serviços que podem ser expostos pelo módulo/componente.
+    {
+      // NG_VALUE_ACCESSOR: Serviço de ControlValueAccessor para comunicação com o formulário.
+      provide: NG_VALUE_ACCESSOR, 
+      // forwardRef: referencia um Componente declarado depois deste dicionário.
+      // No caso, a referência é ao próprio SeletorPassageiroComponent, cujo conteúdo
+      // ainda será explicitado.
+      useExisting: forwardRef(() => SeletorPassageiroComponent),
+      // multi: informa se o provider pode fornecer múltiplas diretivas.
+      multi: true, // Sim, o componente é um multi-provider.
+    }
+  ]
+})
+export class SeletorPassageiroComponent implements ControlValueAccessor {
+  // Resto do código
+}
+```
+
+Vamos definir o que acontece ao submeter o formulário de `FormBuscaComponent`:
+```HTML
+<!-- frontend\src\app\shared\form-busca\form-busca.component.html -->
+<!-- Resto do código -->
+  <form [formGroup]="formBuscaService.formBusca" (ngSubmit)="buscar()">
+<!-- Resto do código -->
+```
+
+O event binding `(ngSubmit)` está procurando o método `buscar()` que ainda não está implementado no componente `FormBuscaComponent`. Vamos implementar apenas a impressão no `console.log` ao submeter o formulário:
+```TypeScript
+// frontend\src\app\shared\form-busca\form-busca.component.ts
+// Resto do código
+export class FormBuscaComponent {
+  // Resto do código
+  buscar() {
+    console.log(this.formBuscaService.formBusca.value)
+  }
+}
+```
