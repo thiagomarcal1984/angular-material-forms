@@ -1075,3 +1075,57 @@ Nas próximas aulas haverá mais detalhes dos eventos personalizados `onChange` 
 - `registerOnChange(fn: any)`: registra o evento que vai tratar a mudança de valor do componente e notifica o Angular Forms sobre as mudanças.
 - `registerOnTouched(fn: any)`: evento disparado quando o valor do componente muda.
 - `setDisabledState?(isDisabled: boolean)`: personaliza o estado de desabilitado do componente.
+
+## Alterando o valor
+Mudança do HTML do componente `SeletorPassageiroComponent`
+```HTML
+<!-- frontend\src\app\shared\seletor-passageiro\seletor-passageiro.component.html -->
+<ul>
+  <!-- Resto do código -->
+  <li>
+    <app-botao-controle
+      operacao="decrementar"
+      (click)="decrementar()"
+    />
+    <span>{{ value }}</span>
+    <app-botao-controle
+      operacao="incrementar"
+      (click)="incrementar()"
+    />
+  </li>
+</ul>
+```
+
+
+```TypeScript
+// frontend\src\app\shared\seletor-passageiro\seletor-passageiro.component.ts
+// Resto do código
+export class SeletorPassageiroComponent implements ControlValueAccessor {
+  // Resto do código
+  onChange = (val: number) => {}
+  onTouch = () => {}
+
+  // Resto do código
+  registerOnChange(fn: any): void {
+    this.onChange = fn // A função fn é atribuída para onChange.
+  }
+  registerOnTouched(fn: any): void {
+    this.onChange = fn // A função fn é atribuída para onTouch.
+  }
+
+  // Resto do código
+  incrementar() {
+    this.value++
+    this.onChange(this.value)
+    this.onTouch()
+  }
+  decrementar() {
+    if(this.value > 0) {
+      this.value--
+      this.onChange(this.value)
+      this.onTouch()
+    }
+  }
+}
+```
+> O event binding `click` vai chamar as operações `incrementar()` e `decrementar()`. Cada uma dessas operações chama os dois métodos que serão modificados pela implementação da interface `ControlValueAccessor`.

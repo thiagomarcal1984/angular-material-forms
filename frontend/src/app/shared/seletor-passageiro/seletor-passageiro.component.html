@@ -2,8 +2,14 @@
   <li><strong>{{ titulo }}</strong></li>
   <li>{{ subtitulo }}</li>
   <li>
-    <app-botao-controle operacao="decrementar"></app-botao-controle>
-    <span>1</span>
-    <app-botao-controle operacao="incrementar"></app-botao-controle>
+    <app-botao-controle
+      operacao="decrementar"
+      (click)="decrementar()"
+    />
+    <span>{{ value }}</span>
+    <app-botao-controle
+      operacao="incrementar"
+      (click)="incrementar()"
+    />
   </li>
 </ul>
