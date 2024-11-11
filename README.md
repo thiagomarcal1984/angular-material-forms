@@ -1028,3 +1028,44 @@ Mudanças no HTML do componente `ModalComponent`:
 ```
 
 > Houve mudanças nos SCSS dos dois HTMLs, mas essa mudança não é relevante pro entendimento do Angular.
+
+## Implementando o ControlValueAccessor
+`ControlValueAccessor` é uma interface dos formulários do Angular. Ele força a implementação de 4 métodos: 
+1. `writeValue(val: any): void`;
+2. `registerOnChange(fn: any): void`;
+3. `registerOnTouched(fn: any): void`;
+4. `setDisabledState?(isDisabled: boolean): void`.
+
+Vamos mudar o componente `SeletorPassageiroComponent`:
+```TypeScript
+// frontend\src\app\shared\seletor-passageiro\seletor-passageiro.component.ts
+import { Component, Input } from '@angular/core';
+import { ControlValueAccessor } from '@angular/forms';
+
+@Component({
+  // Resto do código
+})
+export class SeletorPassageiroComponent implements ControlValueAccessor {
+  // Resto do código
+
+  value: number = 0
+
+  onChange = () => {}
+  onTouch = () => {}
+
+  writeValue(val: any): void {
+    this.value = val
+  }
+  registerOnChange(fn: any): void {
+    this.onChange = fn // A função fn é atribuída para onChange.
+  }
+  registerOnTouched(fn: any): void {
+    this.onChange = fn // A função fn é atribuída para onTouch.
+  }
+  setDisabledState?(isDisabled: boolean): void {
+    throw new Error('Method not implemented.');
+  }
+}
+```
+
+Nas próximas aulas haverá mais detalhes dos eventos personalizados `onChange` e `onTouch`.
