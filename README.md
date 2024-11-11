@@ -835,3 +835,76 @@ Atualização do HTML do componente `FormBuscaComponent` para referenciar a fun�
 ```
 
 > Mudanças no SCSS foram feitas, mas não são de destaque para o curso.
+
+## Chips e o form control
+A aula visa controlar o estado de um `MaterialChipListbox`.
+
+Vamos mudar o serviço `FormBuscaService`:
+```TypeScript
+// frontend\src\app\core\services\form-busca.service.ts
+// Resto do código
+import { MatChipSelectionChange } from '@angular/material/chips';
+// Resto do código
+@Injectable({
+  providedIn: 'root'
+})
+export class FormBuscaService {
+  constructor(
+    private dialog: MatDialog,
+  ) {
+    this.formBusca = new FormGroup({
+      // Resto do código
+      tipo: new FormControl("Econômica"),
+    })
+  }
+  // Resto do código
+  alterarTipo(evento: MatChipSelectionChange, tipo: string) {
+    if (evento.selected) {
+      // `patchValue` é um método para mudança parcial do objeto FormGroup.
+      this.formBusca.patchValue({tipo}) 
+      console.log(`Tipo de passagem alterado para: ${this.formBusca.get('tipo')?.value}`)
+    }
+  }
+}
+```
+> Note o tipo de evento fornecido como primeiro parâmetro do método `alterarTipo`: é o evento do tipo `MatChipSelectionChange`.
+
+O serviço vai ser referenciado no componente `ModalComponent`:
+```TypeScript
+// frontend\src\app\shared\modal\modal.component.ts
+import { Component } from '@angular/core';
+import { FormBuscaService } from 'src/app/core/services/form-busca.service';
+
+@Component({
+  // Resto do código
+})
+export class ModalComponent {
+  constructor(
+    public formBuscaService: FormBuscaService
+  ){}
+}
+```
+
+```HTML
+<!-- frontend\src\app\shared\modal\modal.component.html -->
+<!-- Resto do código -->
+  <mat-chip-listbox aria-label="Seleção de passagens">
+    <mat-chip-option
+      value="Econômica"
+      [selected]="formBuscaService.formBusca.get('tipo')?.value === 'Econômica'"
+      (selectionChange)="formBuscaService.alterarTipo($event, 'Econômica')"
+    >
+      Econômica
+    </mat-chip-option>
+    <mat-chip-option
+      value="Executiva"
+      [selected]="formBuscaService.formBusca.get('tipo')?.value === 'Executiva'"
+      (selectionChange)="formBuscaService.alterarTipo($event, 'Executiva')"
+    >
+      Executiva
+    </mat-chip-option>
+  </mat-chip-listbox>
+<!-- Resto do código -->
+```
+> Repare que a propriedade `[selected]` espera um booleano, não uma string. Por isso está entre chaves.
+> Note também que há um event binding para `(selectionChange)`. Isso permite a mudança de estado do MatChipListbox, conforme método alterarTipo no serviço `FormBuscaService`.
