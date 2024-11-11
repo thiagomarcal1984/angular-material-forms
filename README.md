@@ -770,3 +770,68 @@ Agora, a estrutura do HTML do componente pai `FormBuscaComponent`:
 ```
 
 > Note que a propriedade `[control]` recebe um objeto complexo (não a string contida entre as aspas) retornado da função `obterControle` do objeto `formBuscaService` do compoonente.
+
+# Controlando a modal
+## Abertura e fechamento
+O código agora consiste em migrar código do componente `FormBuscaComponent` para o serviço `FormBuscaService`.
+
+Remoção do código de `FormBuscaComponent`:
+```TypeScript
+// frontend\src\app\shared\form-busca\form-busca.component.ts
+import { Component } from '@angular/core';
+import { FormBuscaService } from 'src/app/core/services/form-busca.service';
+
+@Component({
+  // Resto do código
+})
+export class FormBuscaComponent {
+  constructor(
+    public formBuscaService: FormBuscaService
+  ) {}
+}
+```
+
+Acréscimo do código em `FormBuscaService`:
+```TypeScript
+// frontend\src\app\core\services\form-busca.service.ts
+import { Injectable } from '@angular/core';
+// Resto do código
+import { MatDialog } from '@angular/material/dialog';
+import { ModalComponent } from 'src/app/shared/modal/modal.component';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class FormBuscaService {
+  formBusca: FormGroup
+  constructor(
+    private dialog: MatDialog,
+  ) {
+    // Resto do código
+  }
+
+  // Resto do código
+  openDialog() {
+    this.dialog.open(ModalComponent, {
+      width: '50%'
+    })
+  }
+}
+```
+
+Atualização do HTML do componente `FormBuscaComponent` para referenciar a função distribuída para o serviço `FormBuscaService`:
+```HTML
+<!-- frontend\src\app\shared\form-busca\form-busca.component.html -->
+<!-- Resto do código -->
+  <mat-chip-listbox aria-label="Seleção de passagens">
+    <mat-chip (click)="formBuscaService.openDialog()">
+      <!-- Resto do código -->
+    </mat-chip>
+    <mat-chip (click)="formBuscaService.openDialog()">
+      <!-- Resto do código -->
+    </mat-chip>
+  </mat-chip-listbox>
+<!-- Resto do código -->
+```
+
+> Mudanças no SCSS foram feitas, mas não são de destaque para o curso.
