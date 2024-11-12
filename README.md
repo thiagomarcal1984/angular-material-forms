@@ -1206,3 +1206,139 @@ export class FormBuscaComponent {
   }
 }
 ```
+
+## Desafio: depoimentos dinâmicos e buscando controles
+Hierarquia dos componentes:
+Home > Depoimentos > CardDepoimento > Interface Depoimento
+
+Atualizando o arquivo `types.ts` para inserir a interface de `Depoimento`:
+```TypeScript
+// frontend\src\app\core\types\type.ts
+// Resto do código
+export interface Depoimento {
+  id: number
+  texto: string
+  autor: string
+  avatar: string
+}
+```
+
+Criando o serviço de depoimento:
+```bash
+ng g s core/services/depoimento
+# Output
+CREATE src/app/core/services/depoimento.service.spec.ts (377 bytes)
+CREATE src/app/core/services/depoimento.service.ts (139 bytes)
+```
+
+Implementação do serviço `DepoimentoService`:
+```TypeScript
+// frontend\src\app\core\services\depoimento.service.ts
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { environment } from 'src/environments/environment';
+import { Depoimento } from '../types/type';
+import { Observable } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class DepoimentoService {
+  apiUrl = environment.apiUrl
+  constructor(private http: HttpClient) { }
+
+  listar() : Observable<Depoimento[]> {
+    return this.http.get<Depoimento[]>(`${this.apiUrl}/depoimentos`)
+  }
+}
+```
+
+Mudança no Type Script do componente `CardDepoimento`:
+```TypeScript
+// frontend\src\app\shared\card-depoimento\card-depoimento.component.ts
+import { Component, Input } from '@angular/core';
+import { Depoimento } from 'src/app/core/types/type';
+
+@Component({
+  // Resto do código
+})
+export class CardDepoimentoComponent {
+  @Input() depoimento!: Depoimento
+}
+```
+
+Mudança no HTML do componente `CardDepoimento`:
+```HTML
+<!-- frontend\src\app\shared\card-depoimento\card-depoimento.component.html -->
+<mat-card class="depoimento">
+  <mat-card-content>
+    <img src="{{ depoimento.avatar }}" alt="Avatar da pessoa autora do depoimento">
+    <ul>
+      <li>{{ depoimento.texto }}</li>
+      <li>
+        <strong>{{ depoimento.autor }}</strong>
+      </li>
+    </ul>
+  </mat-card-content>
+</mat-card>
+```
+> Note que o HTML está referenciando o objeto `depoimento`, mas que ele ainda não tem atribuição explícita. Essa atribuição é feita pelo componente pai, no caso seria o novo componente `DepoimentoComponent`.
+
+
+Criando o componente de depoimento `DepoimentoComponent` (que vai englobar o componente `CardDepoimentoComponent`):
+```bash
+ng g c pages/home/depoimentos
+# Output
+CREATE src/app/pages/home/depoimentos/depoimentos.component.html (26 bytes)
+CREATE src/app/pages/home/depoimentos/depoimentos.component.spec.ts (594 bytes)
+CREATE src/app/pages/home/depoimentos/depoimentos.component.ts (223 bytes)
+CREATE src/app/pages/home/depoimentos/depoimentos.component.scss (0 bytes)
+UPDATE src/app/app.module.ts (3184 bytes)
+```
+
+Implementação TypeScript de `DepoimentoComponent`:
+```TypeScript
+// frontend\src\app\pages\home\depoimentos\depoimentos.component.ts
+import { DepoimentoService } from 'src/app/core/services/depoimento.service';
+import { Component } from '@angular/core';
+import { Depoimento } from 'src/app/core/types/type';
+
+@Component({
+  // Resto do código
+})
+export class DepoimentosComponent {
+  depoimentos! : Depoimento[]
+  constructor(
+    private service : DepoimentoService,
+  ) {
+    // Outra forma é jogar estes comandos para ngOnInit()
+    this.service.listar().subscribe(
+      resposta => this.depoimentos = resposta
+    )
+  }
+}
+```
+> Note que o método `DepoimentoService.listar()` retorna um `Observable`, as a lista de depoimentos é um array. É necessário fazer essa conversão de `Observable` por array usando o método `subscribe` do `Observable`.
+
+Implementação do HTML de `DepoimentoComponent`:
+```HTML
+<!-- frontend\src\app\pages\home\depoimentos\depoimentos.component.html -->
+<div class="card-wrapper">
+  <app-card-depoimento *ngFor="let item of depoimentos" [depoimento]="item"/>
+</div>
+```
+> Note que cada `CardDepoimentoComponent` só recebe seu respectivo depoimento após o data binding em `DepoimentoComponent`. O `item` da diretiva `ngFor` é atribuído à propriedade `depoimento` de `CardDepoimentoComponent`.
+
+Finalmente, a mudança na página principal (`HomeComponent`):
+```HTML
+<!-- frontend\src\app\pages\home\home.component.html -->
+<section class="homepage">
+  <!-- Resto do código -->
+  <app-container>
+    <!-- Resto do código -->
+    <h2>Depoimentos</h2>
+    <app-depoimentos/> <!-- Inserção do componente -->
+  </app-container>
+  <!-- Resto do código -->
+</section>
+```
