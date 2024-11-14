@@ -22,14 +22,14 @@
         <mat-chip (click)="formBuscaService.openDialog()">
           <div class="inner">
             <mat-icon>check</mat-icon>
-            Econômica
+        {{ formBuscaService.obterControle('tipo').value }}
           </div>
         </mat-chip>
       </mat-chip-listbox>
     </div>
     <div class="flex-container">
       <app-dropdown-uf label="Origem" iconePrefixo="flight_takeoff" [control]="formBuscaService.obterControle('origem')"/>
-      <button mat-icon-button>
+      <button mat-icon-button (click)="formBuscaService.trocarOrigemDestino()">
         <mat-icon>sync_alt</mat-icon>
       </button>
       <app-dropdown-uf label="Destino" iconePrefixo="flight_land" [control]="formBuscaService.obterControle('destino')"/>

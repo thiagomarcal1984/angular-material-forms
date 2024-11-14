@@ -1342,3 +1342,64 @@ Finalmente, a mudança na página principal (`HomeComponent`):
   <!-- Resto do código -->
 </section>
 ```
+
+## Desafio: últimos detalhes
+Mudanças propostas: 
+1. limitar o tamanho do nosso `dropdown-uf` em 230px.
+```CSS
+/* frontend\src\app\shared\form-busca\dropdown-uf\dropdown-uf.component.scss */
+mat-form-field {
+  width: 230px;
+}
+```
+2. ajustar a exibição da quantidade de passageiros.
+> Esta daqui está IMPOSSÍVEL de responder.
+
+3. ajustar a exibição do tipo de passagem.
+```HTML
+<!-- frontend\src\app\shared\form-busca\form-busca.component.html -->
+<!-- Resto do código -->
+  <mat-chip-listbox aria-label="Seleção de passagens">
+    <!-- Resto do código -->
+    <mat-chip (click)="formBuscaService.openDialog()">
+      <div class="inner">
+        <mat-icon>check</mat-icon>
+        {{ formBuscaService.obterControle('tipo').value }}
+        <!-- Aqui é onde se mostra o tipo de passagem. -->
+      </div>
+    </mat-chip>
+  </mat-chip-listbox>
+<!-- Resto do código -->
+```
+
+4. alternar os valores de origem e destino.
+```HTML
+<!-- frontend\src\app\shared\form-busca\form-busca.component.html -->
+<!-- Resto do código -->
+  <button mat-icon-button (click)="formBuscaService.trocarOrigemDestino()">
+    <mat-icon>sync_alt</mat-icon>
+  </button>
+<!-- Resto do código -->
+```
+
+```TypeScript
+// frontend\src\app\core\services\form-busca.service.ts
+import { Injectable } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
+// Resto do código
+
+@Injectable({
+  providedIn: 'root'
+})
+export class FormBuscaService {
+  // Resto do código
+  trocarOrigemDestino() {
+    const origem = this.obterControle('origem')?.value
+    const destino = this.obterControle('destino')?.value
+    this.formBusca.patchValue({
+      origem: destino,
+      destino: origem,
+    })
+  }
+}
+```

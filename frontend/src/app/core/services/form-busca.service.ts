@@ -59,4 +59,13 @@ export class FormBuscaService {
     descricao = descricao.substring(0, descricao.length -2)
     return descricao
   }
+
+  trocarOrigemDestino() {
+    const origem = this.obterControle('origem')?.value
+    const destino = this.obterControle('destino')?.value
+    this.formBusca.patchValue({
+      origem: destino,
+      destino: origem,
+    })
+  }
 }
